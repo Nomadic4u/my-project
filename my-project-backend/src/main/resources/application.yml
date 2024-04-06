@@ -8,3 +8,13 @@ spring:
     password: 20031213dmy
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/my_project
+  mail:
+    host: smtp.163.com
+    username: 18989152637@163.com
+    password: EUMJBGDXOGPXPDOO
+  rabbitmq:
+    addresses: 8.137.50.120
+    port: 5672
+    username: admin
+    password: 20031213dmyD!
+    virtual-host: /

@@ -64,19 +64,24 @@
 			<groupId>com.baomidou</groupId>
 			<artifactId>mybatis-plus-boot-starter</artifactId>
 			<version>3.5.5</version>
-<!--			<exclusions>-->
-<!--				<exclusion>-->
-<!--					<groupId>org.mybatis</groupId>-->
-<!--					<artifactId>mybatis-spring</artifactId>-->
-<!--				</exclusion>-->
-<!--			</exclusions>-->
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.mybatis</groupId>-->
-<!--			<artifactId>mybatis-spring</artifactId>-->
-<!--			&lt;!&ndash; 替换为你想要引入的新版本 &ndash;&gt;-->
-<!--			<version>3.0.3</version>-->
-<!--		</dependency>-->
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-amqp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
