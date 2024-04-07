@@ -17,4 +17,4 @@ spring:
     port: 5672
     username: admin
     password: 20031213dmyD!
-    virtual-host: /
+    virtual-host: mail

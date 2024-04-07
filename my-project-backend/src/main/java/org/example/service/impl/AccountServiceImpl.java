@@ -1,8 +1,10 @@
 package org.example.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import org.example.entity.dto.Account;
+import org.example.entity.vo.request.EmailRegisterVO;
 import org.example.mapper.AccountMapper;
 import org.example.service.AccountService;
 import org.example.utils.Const;
@@ -12,11 +14,14 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+
 
 @Service
 public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> implements AccountService {
@@ -30,6 +35,9 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
 
     @Resource
     StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    PasswordEncoder passwordEncoder;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -55,7 +63,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     @Override
     public String registerEmailVerifyCode(String type, String email, String ip) {
         synchronized (ip.intern()) { // 这里用到了字符串池, String.intern()方法会先看字符串池中是否有这个String对象的字符串, 有的话直接返回, 没有的话就将这个对象添加到字符串池中, 并返回引用. 这个主要是为了确保在多个地方使用ip锁的时候是共用同一个对象
-            if(!this.verifyLimit(ip)) {
+            if (!this.verifyLimit(ip)) {
                 return "请求频繁, 请稍后再试";
             }
             // 生成验证码
@@ -68,6 +76,39 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
             return null;
         }
 
+    }
+
+    @Override
+    public String registerEmailAccount(EmailRegisterVO vo) {
+        String email = vo.getEmail();
+        String name = vo.getName();
+        String code = stringRedisTemplate.opsForValue().get(Const.VERIFY_EMAIL_DATA + email);
+        if (code == null)
+            return "请先获取验证码";
+        if (!code.equals(vo.getCode()))
+            return "验证码输入错误, 请重新输入";
+        if (this.existsAccountByEmail(email))
+            return "此电子邮件已被其他用户注册";
+        if (this.existsAccountByName(name))
+            return "此用户名已被其他用户注册";
+        String password = passwordEncoder.encode(vo.getPassword());
+        Account account = new Account(null, name, password, email, "user", new Date());
+        if (!this.save(account)) {
+            return "内部错误请联系管理员";
+        }
+        // 删除redis中的验证码
+        stringRedisTemplate.delete(Const.VERIFY_EMAIL_DATA + email);
+        return null;
+    }
+
+    // 通过邮件判断用户是否存在
+    private boolean existsAccountByEmail(String email) {
+        return this.baseMapper.exists(Wrappers.<Account>query().eq("email", email));
+    }
+
+    // 通过用户名判断用户是否存在
+    private boolean existsAccountByName(String name) {
+        return this.baseMapper.exists(Wrappers.<Account>query().eq("username", name));
     }
 
     private boolean verifyLimit(String ip) {

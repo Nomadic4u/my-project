@@ -46,7 +46,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(conf -> conf
-                        .requestMatchers("api/auth/**").permitAll() //放行
+                        .requestMatchers("api/auth/**", "/error").permitAll() //放行
                         .anyRequest() // 任何请求都不允许通过
                         .authenticated() // 验证之后才能通过
 
